@@ -1,0 +1,110 @@
+﻿### r wordcloud
+### wordcloud(words, freq, scale=c(n,n), min.freq=  , max.word=inf,)
+## words : 출력할 단어
+## freq : 언급된 빈도수
+## min.freq : 최소언급횟수
+## max.freq : 최대언급횟수
+
+## 순서
+# 1. 필요 data 확보
+# 2. 필요 패키지 설치 : KoNLP, wordcloud
+# 3. data 읽어오기 : readLines
+# 4, 명사 추출 : sapply(data, extractNoun, ...)
+# 5. 필요없는 단어 삭제 : gsub
+# 6. 파일 내보내기 및 불러오기
+# 7. 분할표 만들기
+# 8 .wordcloud 만들기
+
+
+
+## 1. 데이터 확보
+# 첨부파일 참고!!
+# 크롤링 작업은 다음 post!
+# 일단은 자료가 있다는 전제하에 wordcloud 하는법
+
+
+## 2. 필요 패키지 설치
+# install.packages("KoNLP")
+library(KoNLP)
+# install.packages("wordcloud")
+library(wordcloud)
+useSejongDic()
+ # 세종사전 사용
+
+
+
+
+## 3. data 읽어오기
+
+# setwd() : 작업 디렉토리 설정
+# 참고 : 
+
+data1 <- readLines("seoul.txt")
+  # list로 불러온다
+head(data1)
+
+
+
+
+## 4. 명사 추출
+data2 <- sapply(data1, extractNoun,USE.NAMES=F)
+  # extracxtNoun : 문장을 단어로만든후 명사 추출
+data2
+
+
+## list -> unlist
+data3 <- unlist(data2)
+head(data3)
+
+
+## 5. gsub : 필요없는 단어 삭제하기
+data3 <- gsub("\\d+","",data3)
+ # 모든 숫자 없애기
+data3 <- gsub("-","",data3)
+data3 <- gsub("_","",data3)
+data3 <- gsub(" ","",data3)
+data3 <- Filter(function(x){nchar(x)>1}, data3)
+head(data3)
+ # head로 했지만 전체적으로 보는게 좋죠
+
+
+## 6. 파일 내보내기
+write(unlist(data3),"seoul2.txt")
+
+## 파일 불러오기
+data4 <- read.table("seoul2.txt")
+head(data4)
+
+
+
+
+## 7. table(분할표) 만들기
+word <- table(data4)
+head(sort(word,decreasing=T),20)
+data3 <- gsub("서울시","",data3)
+  # 필요없는 단어 다시 삭제
+
+# 파일 내보내기
+write(unlist(data3),"seoul3.txt")
+
+# 파일 불러오기
+data4 <- read.table("seoul3.txt")
+head(data4)
+
+
+# table 만들기
+word <- table(data4)
+head(sort(word,decreasing=T),20)
+
+
+
+
+## 8. wordcloud 만들기
+# install.packages("RColorBrewer")
+library(RColorBrewer)  # 색깔 관련 패키지
+
+palete <- brewer.pal(9,"Set3")
+wordcloud(names(word), freq=word, min.freq=2, 
+          random.order=F, random.color=T, 
+          colors=palete)
+
